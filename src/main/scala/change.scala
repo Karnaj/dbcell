@@ -16,14 +16,14 @@ abstract class Change(val p: Position, var v: Int) {
   def propagateChange(viewed: List[Change]) = {
     if(v != old) {
       affecteds.foreach { a =>
-        if(!a.follow_propagation(this, viewed)) correct = false
+        a.follow_propagation(this, viewed)
       }
       old = v
       hasChanged = true
     }
   }
 
-  def follow_propagation(c: Change, viewed: List[Change]): Boolean = true
+  def follow_propagation(c: Change, viewed: List[Change]) = ()
 
   def changeValue(newValue: Int) = {
     v = newValue
@@ -50,13 +50,19 @@ extends Change(pos, value) {
     b.contains(c.p)
   }
 
-  override def follow_propagation(c: Change, viewed: List[Change]): Boolean = {
-    if(!c.correct) correct = false
-    if(viewed.contains(this)) return false
-
-    if(counted == c.v) v = v + 1
-    else if(counted == c.old) v = v - 1
-    propagateChange(this::viewed)
-    correct
+  override def follow_propagation(c: Change, viewed: List[Change])= {
+    if(viewed.contains(this)) {
+      var l = viewed
+      while(l.head != this) {
+        l.head.correct = false
+        l = l.tail
+      }
+      correct = false
+    }
+    else {
+      if(counted == c.v) v = v + 1
+      else if(counted == c.old) v = v - 1
+      propagateChange(this::viewed)
+    }
   }
 }
