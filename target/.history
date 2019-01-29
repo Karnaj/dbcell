@@ -1,0 +1,59 @@
+sbt run
+run
+compile
+run
+run test.csv out.txt
+exit
+run ee file.txt ee ee
+run ee File/file.txt ee ee
+run ee file.txt ee ee
+run ee File/test.txt ee ee
+run ee test.txt ee ee
+run
+run ee test.txt ee ee
+scala
+val b = """(\d+) (\d+) =#\\((\d+), (\d+), (\d+), (\d+)\\)""".r
+run
+compile
+run
+run ee test.txt ee ee
+run
+run ee test.txt ee ee
+run
+run ee test.txt ee ee
+run
+val it = Iterator("a", "b")
+run
+val it = Iterator("a", "b")
+run
+compile
+val it = Iterator("a", "b")
+compile
+run test.csv test.txt
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+2
+run test.csv test.txt result.csv changes.txt
+2
+run test.csv test.txt result.csv changes.txt
+2
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
+run
+run test.csv test.txt result.csv changes.txt
