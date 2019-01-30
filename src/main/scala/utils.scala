@@ -1,7 +1,11 @@
 package utils
+import scala.math.Ordering.Implicits._
+import change._
 
 class Position(val x: Int, val y: Int) {
   override def toString = s"(${x}, ${y})"
+
+  def >(other: Position): Boolean = (x, y) > (other.x, other.y)
 }
 
 class Block(val topLeft: Position, val bottomRight: Position) {
@@ -13,7 +17,20 @@ class Block(val topLeft: Position, val bottomRight: Position) {
     return position.x >= topLeft.x && position.x <= bottomRight.x &&
            position.y >= topLeft.y && position.y <= bottomRight.y
   }
+
+  def isAfter(p: Position): Boolean = {
+    topLeft > p
+  }
 }
+
+object Change {
+  def sortByBlockPosition(l: List[BChange]): List[BChange] = {
+    l.sortBy { c =>
+      (c.b.topLeft.x, c.b.topLeft.y, c.b.bottomRight.x, c.b.bottomRight.y)
+    }
+  }
+}
+
 
 object Resource {
   def using[A <: { def close(): Unit }, B](resource: A)(f: A => B): B =
