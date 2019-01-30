@@ -9,7 +9,7 @@ object ChangePrinter {
     val file = new File(filename)
     val bw = new BufferedWriter(new FileWriter(file))
     changes.foreach { c =>
-      bw.write(c.toString)
+      bw.write(s"${c.p.x}, ${c.p.y}, ${c}}")
       bw.write("\n")
     }
     bw.close
