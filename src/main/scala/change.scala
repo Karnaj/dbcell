@@ -27,7 +27,7 @@ abstract class Change(val p: Position, var v: Int) {
 
   def changeValue(newValue: Int) = {
     v = newValue
-    propagateChange(List())
+    propagateChange(List(this))
   }
 
   def firstPropagation = propagateChange(List(this))
