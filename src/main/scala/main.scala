@@ -3,10 +3,9 @@ import user_file_parser._
 import change._
 import utils._
 import csv_preprocessor._
-import csv_count_a._
 import printer._
 import dependencies._
-import bprocess._
+import evaluator._
 
 
 object Main {
@@ -33,15 +32,13 @@ object Main {
     val (ucas, ucbs): (List[AChange], List[BChange]) = split(ucs)
 
     Resource.using(io.Source.fromFile(args(0))) {
-      CSVCountA.countA(_, fcbs, ucbs, ucas)
+      CSVPreProcessor.countA(_, fcbs, ucbs, ucas)
     }
 
     Dependencies.compute(fcbs)
+    Evaluator.compute(fcbs)
 
-    print("Dependencies computed")
-    BProcess.compute(fcbs)
     ChangePrinter.toFile(args(3), fcbs)
-
     Resource.using(io.Source.fromFile(args(0))) {
      CSVPrinter.printCSVWithChanges(_, args(2), fcbs)
     }
