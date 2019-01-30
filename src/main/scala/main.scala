@@ -27,22 +27,21 @@ object Main {
     }
 
     val fcbs: List[BChange] = Resource.using(io.Source.fromFile(args(0))) {
-      CSVPreProcessor.processInitialChanges(_).sortBy { c => (c.p.x, c.p.y) }
+      CSVPreProcessor.searchFormulae(_).sortBy { c => (c.p.x, c.p.y) }
     }
 
     val (ucas, ucbs): (List[AChange], List[BChange]) = split(ucs)
 
     Resource.using(io.Source.fromFile(args(0))) {
-      CSVCountA.countAByChange(_, fcbs, ucbs, ucas)
+      CSVCountA.countA(_, fcbs, ucbs, ucas)
     }
 
-
     Dependencies.compute(fcbs)
-    BProcess.compute(fcbs)
-    /*ChangePrinter.printChange(fcbs)*/
 
+    print("Dependencies computed")
+    BProcess.compute(fcbs)
     ChangePrinter.toFile(args(3), fcbs)
-    
+
     Resource.using(io.Source.fromFile(args(0))) {
      CSVPrinter.printCSVWithChanges(_, args(2), fcbs)
     }
