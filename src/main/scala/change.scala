@@ -9,28 +9,62 @@ abstract class Change(val p: Position, var v: Int) {
 
 
   var affecteds: List[Change] = List()
+  var dependencies: List[Change] = List()
   var hasChanged: Boolean = false
   var old = -1
   var correct: Boolean = true
 
-  def propagateChange(viewed: List[Change]) = {
+  def applyChange(viewed: List[Change]) = {
     if(v != old) {
       affecteds.foreach { a =>
-        a.follow_propagation(this, viewed)
+        a.propagate(this, viewed)
       }
       old = v
       hasChanged = true
     }
   }
 
-  def follow_propagation(c: Change, viewed: List[Change]) = ()
+  def propagate(c: Change, viewed: List[Change]) = ()
 
   def changeValue(newValue: Int) = {
     v = newValue
-    propagateChange(List(this))
+    applyChange(List(this))
   }
 
-  def firstPropagation = propagateChange(List(this))
+  def propagateSuccess: Unit = {
+    affecteds.foreach { a =>
+      if(!a.correct && a.dependencies.forall(_.correct)) {
+        a.correct = true
+        a.hasChanged = true
+        a.propagateSuccess
+      }
+
+    }
+  }
+
+  def propagateError: Unit = {
+      affecteds.foreach { a =>
+        if(a.correct) {
+          a.hasChanged = true
+          a.correct = false
+          affecteds.foreach(_.propagateError)
+        }
+      }
+    }
+
+  def evaluate = {
+    val oldC = correct
+    correct = true
+    propagateSuccess
+    affecteds.foreach { a =>
+      a.propagate(this, List(this))
+    }
+    if(v != old) {
+      old = v
+      hasChanged = true
+    }
+    if(correct != oldC) hasChanged = true
+  }
 }
 
 
@@ -50,19 +84,17 @@ extends Change(pos, value) {
     b.contains(c.p)
   }
 
-  override def follow_propagation(c: Change, viewed: List[Change])= {
+  override def propagate(c: Change, viewed: List[Change]) = {
     if(viewed.contains(this)) {
-      var l = viewed
-      while(l.head != this) {
-        l.head.correct = false
-        l = l.tail
-      }
+      if(correct) hasChanged = true
       correct = false
+      propagateError
     }
     else {
       if(counted == c.v) v = v + 1
       else if(counted == c.old) v = v - 1
-      propagateChange(this::viewed)
+      applyChange(this::viewed)
+      if(correct) propagateSuccess
     }
   }
 }

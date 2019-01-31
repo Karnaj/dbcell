@@ -26,11 +26,16 @@ import utils._
 }*/
 
 object Dependencies {
-  def compute_affected(c: Change, l: List[Change]) =  {
-    l.foreach { c1 => if(c1.depends_on(c)) c.affecteds = c1 :: c.affecteds }
+  def computeAffected(c: Change, l: List[Change]) =  {
+    l.foreach { c1 =>
+      if(c1.depends_on(c)) {
+        c.affecteds = c1 :: c.affecteds
+        c1.dependencies = c :: c1.dependencies
+      }
+    }
   }
 
   def compute(l: List[Change]) = {
-    l.foreach(compute_affected(_, l))
+    l.foreach(computeAffected(_, l))
   }
 }

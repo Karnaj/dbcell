@@ -16,8 +16,8 @@ object ChangePrinter {
   }
 
   def printChange(changes: List[Change]) = {
-    changes.foreach { c =>
-      if(c.hasChanged) println(c)
+    changes.sortBy { c => (c.p.x, c.p.y) }. foreach { c =>
+      if(c.hasChanged) println(s"${c.p.x}, ${c.p.y}, ${c}")
     }
 
   }

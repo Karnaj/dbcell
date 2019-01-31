@@ -13,6 +13,6 @@ object UserFileParser {
   }
 
   def parse(file: scala.io.BufferedSource) : List[Change] = {
-    file.getLines.map(parseLine).toList.groupBy(_.p).map(_._2.head).toList
-  } 
+    file.getLines.map(parseLine).toList
+  }
 }
