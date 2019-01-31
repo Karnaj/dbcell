@@ -25,7 +25,7 @@ object CSVPreProcessor {
     val (bc, q) = (bcs.head, bcs.tail)
 
     if(bc.b.isAfter(p)) return bcs
-    else if(bc.b.contains(p) && bc.counted == v) bc.v += 1
+    else if(bc.b.contains(p) && bc.counted == v) bc.valueWithInitialA += 1
 
     return bc :: propagateInB(p, v, q)
   }
@@ -36,7 +36,7 @@ object CSVPreProcessor {
     val (ac, q) = (acs.head, acs.tail)
 
     if(ac.p > p) return acs
-    else if(ac.p.x == p.x && ac.p.y == p.y) ac.old = v
+    else if(ac.p.x == p.x && ac.p.y == p.y) ac.valueWithInitialA = v
 
     return propagateInA(p, v, q)
   }
@@ -79,7 +79,7 @@ object CSVPreProcessor {
 
     if(fbcs.isEmpty && ubcs.isEmpty && uacs.isEmpty) return
     if(linesWithX.isEmpty) return
-    
+
     val (str, x) = linesWithX.next
     val cellsWithY: Iterator[(String, Int)] = str.split(";").iterator.zipWithIndex
     val (fr, ur, ar): (List[BChange], List[BChange], List[AChange]) =

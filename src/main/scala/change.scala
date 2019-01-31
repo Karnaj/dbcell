@@ -3,68 +3,39 @@ package change
 import utils._
 
 abstract class Change(val p: Position, var v: Int) {
-  override def toString: String = if(correct) s"${v}" else "P"
-
-  def depends_on(c: Change): Boolean = false
-
 
   var affecteds: List[Change] = List()
-  var dependencies: List[Change] = List()
+  var valueWithInitialA: Int = 0
+
   var hasChanged: Boolean = false
-  var old = -1
+  var oldValue = -1
   var correct: Boolean = true
   var oldCorrect: Boolean = true
+  var has_changed: Boolean = false
+
+  override def toString: String = if(correct) s"${v}" else "P"
+  def depends_on(c: Change): Boolean = false
+  def propagate(c: Change, viewed: List[Change]): Unit = ()
+
+  def evaluate = {
+    applyChange(List())
+  }
 
   def applyChange(viewed: List[Change]) = {
-    if(v != old) {
-      affecteds.foreach { a =>
-        a.propagate(this, viewed)
-      }
-      old = v
-      hasChanged = true
-    }
-    if(!correct) {
-      hasChanged = true
-    }
-  }
-
-  def propagate(c: Change, viewed: List[Change]) = ()
-
-  def changeValue(newValue: Int) = {
-    v = newValue
-    applyChange(List(this))
-  }
-
-  def propagateSuccess: Unit = {
-    affecteds.foreach { a =>
-      if(!a.correct && a.dependencies.forall(_.correct)) {
-        a.correct = true
-        a.propagateSuccess
-      }
-
-    }
+    affecteds.foreach(_.propagate(this, viewed))
   }
 
   def propagateError: Unit = {
-      affecteds.foreach { a =>
-        if(a.correct) {
-          if(a.oldCorrect) a.hasChanged = true
-          a.correct = false
-          affecteds.foreach(_.propagateError)
-        }
-      }
-    }
+    if(!correct) return
+    correct = false
+    has_changed = true
+    affecteds.foreach (_.propagateError)
+  }
 
-  def evaluate = {
+  def init: Unit = {
+    v = valueWithInitialA
+    hasChanged = false
     correct = true
-    propagateSuccess
-    affecteds.foreach { a =>
-      a.propagate(this, List(this))
-    }
-    if(v != old) {
-      old = v
-      hasChanged = true
-    }
   }
 }
 
@@ -85,18 +56,16 @@ extends Change(pos, value) {
     b.contains(c.p)
   }
 
-  override def propagate(c: Change, viewed: List[Change]) = {
+  override def propagate(c: Change, viewed: List[Change]): Unit = {
     if(viewed.contains(this)) {
-      if(correct && oldCorrect) hasChanged = true
-      correct = false
       propagateError
     }
     else {
       if(counted == c.v) v = v + 1
-      else if(counted == c.old) v = v - 1
+      else if(counted == c.oldValue) v = v - 1
+      else return
       applyChange(this::viewed)
-      if(correct) propagateSuccess
-      if(correct != oldCorrect) hasChanged = true
     }
   }
+
 }

@@ -23,7 +23,7 @@ object Main {
     if(toApply == Nil) return
     val (c, rest) = (toApply.head, toApply.tail)
     val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
-    print(s"""after "${c.p.x} ${c.p.y}""")
+    print(s"""after "${c.p.x} ${c.p.y} """)
     println(
       c match {
         case c:AChange => s"""${c}""""
@@ -32,7 +32,7 @@ object Main {
               |${c.b.topLeft.y},
               |${c.b.bottomRight.x},
               |${c.b.bottomRight.y},
-              |${c.counted})""""".stripMargin.replaceAll("\n", " ")
+              |${c.counted})"""".stripMargin.replaceAll("\n", " ")
         }
       }
     )
@@ -41,18 +41,19 @@ object Main {
   }
 
   def main(args: Array[String]): Unit = {
-    if(args.size != 4) throw new Exception
-
-    val ucs: List[Change] = Resource.using(io.Source.fromFile(args(1))) {
-      UserFileParser.parse(_)
+    if(args.size != 4) {
+      println("Error, usage : ./ws data.csv user.txt view0.csv changes.txt")
+      return
     }
+
+    val ucs: List[Change] = UserFileParser.parse(args(1))
 
 
     val fcbs: List[BChange] = Resource.using(io.Source.fromFile(args(0))) {
       CSVPreProcessor.searchFormulae(_)
     }
 
-    val (ucas, ucbs): (List[AChange], List[BChange]) = split(ucs)
+    val (ucas, ucbs): (List[AChange], List[BChange]) = Change.split(ucs)
 
     Resource.using(io.Source.fromFile(args(0))) {
       CSVPreProcessor.countA(_, fcbs, ucbs, ucas)
@@ -64,7 +65,6 @@ object Main {
     Resource.using(io.Source.fromFile(args(0))) {
      CSVPrinter.printCSVWithChanges(_, args(2), fcbs)
     }
-    println()
     applyUserCommands(fcbs, ucs)
   }
 }
