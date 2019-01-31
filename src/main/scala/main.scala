@@ -23,7 +23,19 @@ object Main {
     if(toApply == Nil) return
     val (c, rest) = (toApply.head, toApply.tail)
     val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
-    println(s"""after "${c.p.x} ${c.p.y} ${c}" """)
+    print(s"""after "${c.p.x} ${c.p.y}""")
+    println(
+      c match {
+        case c:AChange => s"""${c}""""
+        case c:BChange => {
+          s"""=#(${c.b.topLeft.x},
+              |${c.b.topLeft.y},
+              |${c.b.bottomRight.x},
+              |${c.b.bottomRight.y},
+              |${c.counted})""""".stripMargin.replaceAll("\n", " ")
+        }
+      }
+    )
     ChangePrinter.printChange(newApplied)
     applyUserCommands(newApplied, rest)
   }
@@ -52,7 +64,7 @@ object Main {
     Resource.using(io.Source.fromFile(args(0))) {
      CSVPrinter.printCSVWithChanges(_, args(2), fcbs)
     }
-
+    println()
     applyUserCommands(fcbs, ucs)
   }
 }

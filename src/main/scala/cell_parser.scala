@@ -14,7 +14,7 @@ object CellParser {
   def parse(x: Int, y:Int, cell: String): Change = {
     return cell match {
       case aCell(v)                  => {
-        if(v < 0 || v > 255)
+        if(v.toInt < 0 || v.toInt > 255)
           throw new InvalidCellContentException(
             s"Invalid value ${v} at position (${x}, ${y}."
           )

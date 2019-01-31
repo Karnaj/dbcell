@@ -36,6 +36,10 @@ object Dependencies {
   }
 
   def compute(l: List[Change]) = {
+    l.foreach {c =>
+      c.affecteds = Nil
+      c.dependencies = Nil
+    }
     l.foreach(computeAffected(_, l))
   }
 }

@@ -13,6 +13,7 @@ abstract class Change(val p: Position, var v: Int) {
   var hasChanged: Boolean = false
   var old = -1
   var correct: Boolean = true
+  var oldCorrect: Boolean = true
 
   def applyChange(viewed: List[Change]) = {
     if(v != old) {
@@ -20,6 +21,9 @@ abstract class Change(val p: Position, var v: Int) {
         a.propagate(this, viewed)
       }
       old = v
+      hasChanged = true
+    }
+    if(!correct) {
       hasChanged = true
     }
   }
@@ -35,7 +39,6 @@ abstract class Change(val p: Position, var v: Int) {
     affecteds.foreach { a =>
       if(!a.correct && a.dependencies.forall(_.correct)) {
         a.correct = true
-        a.hasChanged = true
         a.propagateSuccess
       }
 
@@ -45,7 +48,7 @@ abstract class Change(val p: Position, var v: Int) {
   def propagateError: Unit = {
       affecteds.foreach { a =>
         if(a.correct) {
-          a.hasChanged = true
+          if(a.oldCorrect) a.hasChanged = true
           a.correct = false
           affecteds.foreach(_.propagateError)
         }
@@ -53,7 +56,6 @@ abstract class Change(val p: Position, var v: Int) {
     }
 
   def evaluate = {
-    val oldC = correct
     correct = true
     propagateSuccess
     affecteds.foreach { a =>
@@ -63,7 +65,6 @@ abstract class Change(val p: Position, var v: Int) {
       old = v
       hasChanged = true
     }
-    if(correct != oldC) hasChanged = true
   }
 }
 
@@ -86,7 +87,7 @@ extends Change(pos, value) {
 
   override def propagate(c: Change, viewed: List[Change]) = {
     if(viewed.contains(this)) {
-      if(correct) hasChanged = true
+      if(correct && oldCorrect) hasChanged = true
       correct = false
       propagateError
     }
@@ -95,6 +96,7 @@ extends Change(pos, value) {
       else if(counted == c.old) v = v - 1
       applyChange(this::viewed)
       if(correct) propagateSuccess
+      if(correct != oldCorrect) hasChanged = true
     }
   }
 }
