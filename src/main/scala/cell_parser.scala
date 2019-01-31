@@ -13,10 +13,20 @@ object CellParser {
 
   def parse(x: Int, y:Int, cell: String): Change = {
     return cell match {
-      case aCell(v)                  => new AChange(x, y, v.toInt)
+      case aCell(v)                  => {
+        if(v < 0 || v > 255)
+          throw new InvalidCellContentException(
+            s"Invalid value ${v} at position (${x}, ${y}."
+          )
+        new AChange(x, y, v.toInt)
+      }
       case bCell(r1, c1, r2, c2, vc) =>
         new BChange(x, y, r1.toInt, c1.toInt, r2.toInt, c2.toInt, 0, vc.toInt)
-      case _ => throw new InvalidCellContentException
+      case _ => {
+        throw new InvalidCellContentException(
+          s"Cannot parse ${cell} at position (${x}, ${y}."
+        )
+      }
     }
   }
 }
