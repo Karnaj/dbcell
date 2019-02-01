@@ -6,7 +6,7 @@ import csv_preprocessor._
 import printer._
 import dependencies._
 import evaluator._
-
+import csv_parser._
 import java.io._
 
 object Main {
@@ -51,6 +51,7 @@ object Main {
     Resource.using(io.Source.fromFile(args(0))) {
      CSVPrinter.printCSVWithChanges(_, args(2), fbcs)
     }
+
     applyUserCommands(fbcs, ucs)
   }
 }

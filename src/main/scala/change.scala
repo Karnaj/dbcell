@@ -69,3 +69,19 @@ extends Change(pos, value) {
   }
 
 }
+
+object Change {
+  def sortByBlockPosition(l: List[BChange]): List[BChange] = {
+    l.sortBy { c =>
+      (c.b.topLeft.x, c.b.topLeft.y, c.b.bottomRight.x, c.b.bottomRight.y)
+    }
+  }
+
+  def split(changes: List[Change]): (List[AChange], List[BChange]) = {
+    val (la, lb): (List[Change], List[Change]) = changes.partition {
+      case c: AChange => true
+      case c: BChange => false
+    }
+    (la.map {case a: AChange => a}, lb.map {case b: BChange => b})
+  }
+}

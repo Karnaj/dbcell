@@ -2,7 +2,6 @@ package user_file_parser
 
 import change._
 import cell_parser._
-import utils._
 
 /** Parser for CSV modification command file */
 object UserFileParser {
