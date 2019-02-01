@@ -9,7 +9,7 @@ final case class InvalidCellContentException(
   extends Exception(message)
 
 
-/** Parser for command user file */
+/** Parser for CSV cell string */
 object CellParser {
   val aCell = """(\d+)""".r
   val bCell = """=#\((\d+), (\d+), (\d+), (\d+), (\d+)\)""".r
@@ -49,7 +49,7 @@ object CellParser {
     new BChange(x, y, r1, c1, r2, c2, 0, vc)
   }
 
-  /** Parse a string and create a change with.
+  /** Parse a string and create a Change with the given position.
     *
     * @param x The x position of the cell.
     * @param y The y position of the cell.
