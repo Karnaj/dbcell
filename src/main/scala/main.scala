@@ -11,25 +11,15 @@ import java.io._
 
 object Main {
 
-  def applyUserCommands(applied: List[Change], toApply: List[Change]): Unit = {
-    if(toApply == Nil) return
-    val (c, rest) = (toApply.head, toApply.tail)
-    val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
-    print(s"""after "${c.p.x} ${c.p.y} """)
-    println(
-      c match {
-        case c:AChange => s"""${c}""""
-        case c:BChange => {
-          s"""=#(${c.b.topLeft.x},
-              |${c.b.topLeft.y},
-              |${c.b.bottomRight.x},
-              |${c.b.bottomRight.y},
-              |${c.counted})"""".stripMargin.replaceAll("\n", " ")
-        }
-      }
-    )
-    ChangePrinter.printChange(newApplied)
-    applyUserCommands(newApplied, rest)
+  def applyUserCommands(
+      bw: BufferedWriter,
+      applied: List[Change],
+      toApply: List[Change]): Unit = toApply match {
+    case Nil => ()
+    case c::t =>
+      val newApplied: List[Change] = Modifier.applyNewChange(c, applied)
+      CommandEffectsPrinter.printEffect(bw, c, newApplied)
+      applyUserCommands(bw, newApplied, t)
   }
 
   def main(args: Array[String]): Unit = {
@@ -38,20 +28,22 @@ object Main {
       return
     }
 
-    val ucs: List[Change] = Buffer.using(args(1)) { UserFileParser.parse(_) }
+    val ucs: List[Change] = MyReader.using(args(1)) { UserFileParser.parse(_) }
     val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
-    val fbcs: List[BChange] = Buffer.using(args(0)) { CSVParser.parse(_) }
-    Buffer.using(args(0)) {
+    val fbcs: List[BChange] = MyReader.using(args(0)) { CSVParser.parse(_) }
+    MyReader.using(args(0)) {
       CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, uacs)
     }
 
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
 
-    Resource.using(io.Source.fromFile(args(0))) {
-     CSVPrinter.printCSVWithChanges(_, args(2), fbcs)
+    MyReader.using(args(0)) { input =>
+      MyWriter.using(args(2)) { output =>
+        CSVPrinter.printCSVWithChanges(input, output, fbcs)
+      }
     }
 
-    applyUserCommands(fbcs, ucs)
+    MyWriter.using(args(3)) { applyUserCommands(_, fbcs, ucs) }
   }
 }

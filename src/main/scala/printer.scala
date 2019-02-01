@@ -3,30 +3,40 @@ package printer
 import change._
 import cell_parser._
 import java.io._
+import utils._
 
-object ChangePrinter {
-  def toFile(filename: String, changes: List[Change]) =  {
-    val file = new File(filename)
-    val bw = new BufferedWriter(new FileWriter(file))
-    changes.foreach { c =>
-      bw.write(s"${c.p.x}, ${c.p.y}, ${c}")
-      bw.write("\n")
+object CommandEffectsPrinter {
+
+  private def changeDescription(c: Change): String = c match {
+    case  c:AChange => s"""${c}""""
+    case c:BChange => {
+      s"""=#(${c.b.topLeft.x},
+          |${c.b.topLeft.y},
+          |${c.b.bottomRight.x},
+          |${c.b.bottomRight.y},
+          |${c.counted})"""".stripMargin.replaceAll("\n", " ")
     }
-    bw.close
   }
 
-  def printChange(changes: List[Change]) = {
-    changes.sortBy { c => (c.p.x, c.p.y) }. foreach { c =>
-      if(c.hasChanged) println(s"${c.p.x}, ${c.p.y}, ${c}")
+  def printEffect(bw: BufferedWriter, c: Change, l: List[Change]) = {
+    bw.write(s"""after "${c.p.x} ${c.p.y} """)
+    bw.write(changeDescription(c))
+    bw.write("\n")
+    l.sortBy { c => (c.p.x, c.p.y) }. foreach { c =>
+      if(c.hasChanged) {
+        bw.write(s"${c.p.x}, ${c.p.y}, ${c}\n")
+      }
     }
-
   }
 }
 
+
 object CSVPrinter {
 
-  def printLine(bw: BufferedWriter, line: String, x: Int,
-                l: List[Change]): List[Change] = {
+  private def printLine(
+      bw: BufferedWriter,
+      line: String, x: Int,
+      l: List[Change]): List[Change] = {
     var rest: List[Change] = l
     line.split(";").zipWithIndex.foreach { case (cell, y) =>
       if(y != 0) bw.write(";")
@@ -43,14 +53,13 @@ object CSVPrinter {
     rest
   }
 
-  def printCSVWithChanges(file: scala.io.BufferedSource, outputName: String,
-                          cs: List[Change]) = {
-     var rest: List[Change] = cs.sortBy(c => (c.p.x, c.p.y))
-     val outputFile = new File(outputName)
-     val bw = new BufferedWriter(new FileWriter(outputFile))
-     file.getLines.zipWithIndex.foreach { case (line, x) =>
-       rest = printLine(bw, line, x, rest)
-     }
-     bw.close()
+  def printCSVWithChanges(
+      file: scala.io.BufferedSource,
+      output: java.io.BufferedWriter,
+      cs: List[Change]) = {
+    var rest: List[Change] = cs.sortBy(c => (c.p.x, c.p.y))
+    file.getLines.zipWithIndex.foreach { case (line, x) =>
+      rest = printLine(output, line, x, rest)
+    }
   }
 }
