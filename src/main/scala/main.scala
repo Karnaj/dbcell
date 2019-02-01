@@ -41,7 +41,9 @@ object Main {
     val ucs: List[Change] = Buffer.using(args(1)) { UserFileParser.parse(_) }
     val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
     val fbcs: List[BChange] = Buffer.using(args(0)) { CSVParser.parse(_) }
-    Buffer.using(args(0)) { CSVPreProcessor.countA(_, fbcs, ubcs, uacs) }
+    Buffer.using(args(0)) {
+      CSVPreProcessor.countInitialValues(_, fbcs ::: ubcs, uacs)
+    }
 
     Dependencies.compute(fbcs)
     Evaluator.evaluateChanges(fbcs)
