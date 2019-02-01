@@ -41,7 +41,14 @@ object Change {
 
 
 object Resource {
-  def using[A <: { def close(): Unit }, B](resource: A)(f: A => B): B =
-  try f(resource)
-  finally resource.close()
+  def using[A <: { def close(): Unit }, B](resource: A)(f: A => B): B = {
+    try f(resource)
+    finally resource.close()
+  }
+}
+
+object Buffer {
+  def using[B](fileName: String)(f: io.BufferedSource => B): B = {
+    Resource.using(io.Source.fromFile(fileName))(f(_))
+  }
 }
