@@ -11,14 +11,6 @@ import java.io._
 
 object Main {
 
-  def split(changes: List[Change]): (List[AChange], List[BChange]) = {
-    val (la, lb): (List[Change], List[Change]) = changes.partition {
-      case c: AChange => true
-      case c: BChange => false
-    }
-    (la.map {case a: AChange => a}, lb.map {case b: BChange => b})
-  }
-
   def applyUserCommands(applied: List[Change], toApply: List[Change]): Unit = {
     if(toApply == Nil) return
     val (c, rest) = (toApply.head, toApply.tail)
@@ -46,25 +38,17 @@ object Main {
       return
     }
 
-    val ucs: List[Change] = UserFileParser.parse(args(1))
+    val ucs: List[Change] = Buffer.using(args(1)) { UserFileParser.parse(_) }
+    val (uacs, ubcs): (List[AChange], List[BChange]) = Change.split(ucs)
+    val fbcs: List[BChange] = Buffer.using(args(0)) { CSVParser.parse(_) }
+    Buffer.using(args(0)) { CSVPreProcessor.countA(_, fbcs, ubcs, uacs) }
 
-
-    val fcbs: List[BChange] = Resource.using(io.Source.fromFile(args(0))) {
-      CSVPreProcessor.searchFormulae(_)
-    }
-
-    val (ucas, ucbs): (List[AChange], List[BChange]) = Change.split(ucs)
-
-    Resource.using(io.Source.fromFile(args(0))) {
-      CSVPreProcessor.countA(_, fcbs, ucbs, ucas)
-    }
-
-    Dependencies.compute(fcbs)
-    Evaluator.evaluateChanges(fcbs)
+    Dependencies.compute(fbcs)
+    Evaluator.evaluateChanges(fbcs)
 
     Resource.using(io.Source.fromFile(args(0))) {
-     CSVPrinter.printCSVWithChanges(_, args(2), fcbs)
+     CSVPrinter.printCSVWithChanges(_, args(2), fbcs)
     }
-    applyUserCommands(fcbs, ucs)
+    applyUserCommands(fbcs, ucs)
   }
 }

@@ -13,10 +13,8 @@ object UserFileParser {
     return CellParser.parse(x.toInt, y.toInt, cell)
   }
 
-  def parse(fileName: String): List[Change] = {
-    Resource.using(io.Source.fromFile(fileName)) { file =>
-      file.getLines.map(parseLine).toList
-    }
+  def parse(file: io.BufferedSource): List[Change] = {
+    file.getLines.map(parseLine).toList
   }
 
 }

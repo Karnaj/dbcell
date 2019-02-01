@@ -4,19 +4,22 @@ import change._
 import utils._
 import cell_parser._
 
-object CSVPreProcessor {
-
-  private def processLine(str: String, x: Int): List[BChange] = {
+object CSVParser {
+  private def searchFormulaeInLine(str: String, x: Int): List[BChange] = {
     str.split(";").zipWithIndex.map { case (cell, y) =>
       CellParser.parse(x, y, cell)
     }.collect { case bc: BChange => bc }.toList
   }
 
-  def searchFormulae(file: scala.io.BufferedSource) : List[BChange] = {
+  def parse(file: scala.io.BufferedSource): List[BChange] = {
     file.getLines.zipWithIndex.map { case (line, x) =>
-      processLine(line, x)
+      searchFormulaeInLine(line, x)
     }.foldLeft(List[BChange]())(_ ::: _)
   }
+
+}
+
+object CSVPreProcessor {
 
 
   def propagateInB(p: Position, v: Int, bcs: List[BChange]): List[BChange] = {
